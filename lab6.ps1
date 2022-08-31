@@ -103,15 +103,51 @@ function CurrentVersionRun {
 }
 
 function SpawnCMDs {
-
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.2
+# would be pretty easy to just spawn a command prompt
+# probably have it repeatedly echo the flag every so often so it shows up
 }
 
 function InstallService {
-
+# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service?view=powershell-7.2
 }
 
 function TaskScheduler {
+    # 'ScheduledTask'
+    # {
+    #     $CommandLine = '`"$($Env:SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe -NonInteractive`"'
+    #     $ElevatedTriggerRemoval = "schtasks /Delete /TN Updater"
 
+    #     switch ($ElevatedPersistenceOption.Trigger)
+    #     {
+    #         'AtLogon'
+    #         {
+    #             $ElevatedTrigger = "schtasks /Create /RU system /SC ONLOGON /TN Updater /TR "
+    #         }
+
+    #         'Daily'
+    #         {
+    #             $ElevatedTrigger = "schtasks /Create /RU system /SC DAILY /ST $($ElevatedPersistenceOption.Time.ToString('HH:mm:ss')) /TN Updater /TR "
+    #         }
+
+    #         'Hourly'
+    #         {
+    #             $ElevatedTrigger = "schtasks /Create /RU system /SC HOURLY /TN Updater /TR "
+    #         }
+
+    #         'OnIdle'
+    #         {
+    #             $ElevatedTrigger = "schtasks /Create /RU system /SC ONIDLE /I 1 /TN Updater /TR "
+    #         }
+
+    #         default
+    #         {
+    #             throw 'Invalid elevated persistence options provided!'
+    #         }
+    #     }
+
+    #     $ElevatedTrigger = '"' + $ElevatedTrigger + $CommandLine + '"'
+    # }
 }
 
 function Main {
