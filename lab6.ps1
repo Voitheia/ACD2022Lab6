@@ -12,7 +12,10 @@ $NetcatFlag = "ACDLAB6{Nyancat_bootloader_time}"
 $SpawnedCMDFlag = "ACDLAB6{Hey_you_shouldn't_be_running_there}"
 $InstalledServiceFlag = "ACDLAB6{Definitely_a_legit_service}"
 $TaskSchedulerFlag = "ACDLAB6{Wanna_see_me_run_it_again}"
-
+$KillFTPIISFlag = "ACDLAB6{}"
+$DisableDefenderFlag = "ACDLAB6{}"
+$RDPMisconfigFlag = "ACDLAB6{}"
+$ImageFileExecutionOptionsFlag = "ACDLAB6{}"
 
 function DisableDefender {
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\" -Name "Windows Defender" -ErrorAction Continue
@@ -73,6 +76,8 @@ function DisableFirewall {
 }
 
 function InstallSSH {
+    # this needs to be tested, might be easier to get the openssh binary and install server and client from that
+
     # Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
     # Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
     # Start-Service sshd
@@ -88,6 +93,8 @@ function InstallSSH {
 
 function NetcatListeners {
     # probably replace exe name with flag or something, not sure yet
+    # can also put the flag in a text file next to the exe
+    # might need to include binary bytes in runner
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1337}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1338}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1339}
@@ -98,6 +105,8 @@ function NetcatListeners {
 
 function CurrentVersionRun {
     # Need new names for exes, probably put flags in values next to these
+    # maybe create dummy exes that just pop msg box
+    # can put flag in strings of file? will need to make sure to cover strings in IR lecture in some capacity
     # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name NotMalware -Value %SystemRoot%\system32\not_malware.exe -PropertyType ExpandString -Force
     # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name SuperSafeTotallyLegitProgram -Value %SystemRoot%\system32\SuperSafeTotallyLegitProgram.exe -PropertyType ExpandString -Force
 }
@@ -106,10 +115,18 @@ function SpawnCMDs {
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.2
 # would be pretty easy to just spawn a command prompt
 # probably have it repeatedly echo the flag every so often so it shows up
+# could have the cmdline options include the flag
+# https://github.com/smb01/PowershellTools/blob/master/inject.ps1
+# defender is flagging this, might need invoke-obfuscation
+# in ./inject.ps1
 }
 
 function InstallService {
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service?view=powershell-7.2
+
+    New-Service -Name "LegitService" -BinaryPathName '"C:\WINDOWS\System32\svchost.exe -k netsvcs"' -DisplayName "Legit Service" -StartupType "Automatic" -Description $InstalledServiceFlag
+    Start-Service -Name "LegitService"
+
 }
 
 function TaskScheduler {
@@ -149,6 +166,97 @@ function TaskScheduler {
     #     $ElevatedTrigger = '"' + $ElevatedTrigger + $CommandLine + '"'
     # }
 }
+
+function RDPMisconfig {
+    # https://serverfault.com/questions/911131/how-can-i-locate-registry-key-for-group-policy-settings
+    # https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/secedit
+    # can use this to edit policy?
+    # https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/secedit-configure
+    # https://www.techrepublic.com/article/solutionbase-using-the-secedit-tool-to-work-with-security-templates/
+    # this seems to let me replace the secedit.db with like a template or one that I already have
+    # should be able to actually overwrite policy with this, hopefully put flag in somewhere
+    # i wonder if i can use a db tool to edit
+    # https://www.riptidehosting.com/blog/rd-session-host-security-settings-in-windows-server-2016/
+}
+
+function KillFTPIIS {
+    Stop-Service W3SVC
+    Stop-Service ftpsvc
+    # also need to see if I can modify descrition of service
+    # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-service?view=powershell-7.2
+    Set-Service -Name W3SVC -Description $KillFTPIISFlag
+    Set-Service -Name ftpsvc -Description $KillFTPIISFlag
+}
+
+function BeginMsgBox {
+    Add-Type -AssemblyName PresentationFramework
+    $msgBoxInput = [System.Windows.MessageBox]::Show('WARNING: This script is for CMSC 491/691 Lab 6. DO NOT RUN THIS ON YOUR HOST MACHINE. It WILL damage your computer. ONLY run this script on your CMSC 491/691 Windows Server 2019 VM. Continue?','Hacking Application','YesNo','Error')
+    switch ($msgBoxInput) {
+      'Yes' {
+        continue
+      }
+      'No' {
+        exit
+      }
+    }
+}
+
+function EndMsgBox {
+    Add-Type -AssemblyName PresentationFramework
+
+    $msgBoxInput = [System.Windows.MessageBox]::Show('Hacking complete :)','Hacking Application','YesNoCancel','Error')
+    switch ($msgBoxInput) {
+      'Yes' {
+        [System.Windows.MessageBox]::Show('Thank you for working with me')
+      }
+      'No' {
+        [System.Windows.MessageBox]::Show('That did not seem to work…')
+      }
+      'Cancel' {
+        [System.Windows.MessageBox]::Show('Cannot cancel a job that has already completed')
+      }
+    }    
+}
+
+function Write-ZipUsing7Zip([string]$FilesToZip, [string]$ZipOutputFilePath, [string]$Password, [ValidateSet('7z','zip','gzip','bzip2','tar','iso','udf')][string]$CompressionType = 'zip', [switch]$HideWindow)
+{
+    # Look for the 7zip executable.
+    $pathTo32Bit7Zip = "C:\Program Files (x86)\7-Zip\7z.exe"
+    $pathTo64Bit7Zip = "C:\Program Files\7-Zip\7z.exe"
+    $THIS_SCRIPTS_DIRECTORY = Split-Path $script:MyInvocation.MyCommand.Path
+    $pathToStandAloneExe = Join-Path $THIS_SCRIPTS_DIRECTORY "7za.exe"
+    if (Test-Path $pathTo64Bit7Zip) { $pathTo7ZipExe = $pathTo64Bit7Zip }
+    elseif (Test-Path $pathTo32Bit7Zip) { $pathTo7ZipExe = $pathTo32Bit7Zip }
+    elseif (Test-Path $pathToStandAloneExe) { $pathTo7ZipExe = $pathToStandAloneExe }
+    else { throw "Could not find the 7-zip executable." }
+
+    # Delete the destination zip file if it already exists (i.e. overwrite it).
+    if (Test-Path $ZipOutputFilePath) { Remove-Item $ZipOutputFilePath -Force }
+
+    $windowStyle = "Normal"
+    if ($HideWindow) { $windowStyle = "Hidden" }
+
+    # Create the arguments to use to zip up the files.
+    # Command-line argument syntax can be found at: http://www.dotnetperls.com/7-zip-examples
+    $arguments = "a -t$CompressionType ""$ZipOutputFilePath"" ""$FilesToZip"" -mx9"
+    if (!([string]::IsNullOrEmpty($Password))) { $arguments += " -p$Password" }
+
+    # Zip up the files.
+    $p = Start-Process $pathTo7ZipExe -ArgumentList $arguments -Wait -PassThru -WindowStyle $windowStyle
+
+    # If the files were not zipped successfully.
+    if (!(($p.HasExited -eq $true) -and ($p.ExitCode -eq 0)))
+    {
+        throw "There was a problem creating the zip file '$ZipFilePath'."
+    }
+}
+
+# bigheck 2>&1 | tee -FilePath c:\windows\fonts\results.txt
+
+# Write-ZipUsing7Zip -FilesToZip "c:\windows\fonts\results.txt" -ZipOutputFilePath "c:\windows\fonts\results.zip" -Password "NotSqordfish:)"
+
+# Remove-Item -Path "c:\windows\fonts\results.txt" -Force
+
 
 function Main {
     DisableDefender
