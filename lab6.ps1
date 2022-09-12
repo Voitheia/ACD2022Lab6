@@ -40,6 +40,7 @@ function DisableDefender {
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "SubmitSamplesConsent" -Value 0 -Type DWORD -Force -ErrorAction Continue
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender\Spynet" -Name "DisableBlockAtFirstSeen" -Value 1 -Type DWORD -Force -ErrorAction Continue
 
+    New-Item -Path "HKLM:\SOFTWARE\Policies\Microsoft"-Name "MRT" -Force -ErrorAction Continue
     Set-ItemProperty -Path "HKLM:\SOFTWARE\Policies\Microsoft\MRT" -Name "DontReportInfectionInformation" -Value 1 -Type DWORD -Force -ErrorAction Continue
 
     New-Item -Path 'HKLM:\SOFTWARE\Policies\Microsoft\Windows Defender' -Name "Signature Updates" -Force -ErrorAction Continue
@@ -79,29 +80,29 @@ function DisableFirewall {
 function InstallSSH {
     # this needs to be tested, might be easier to get the openssh binary and install server and client from that 
 
-    # [System.Environment]::SetEnvironmentVariable('Path','C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Windows\System32\OpenSSH-Win64;')
+    [System.Environment]::SetEnvironmentVariable('Path','C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem;C:\Windows\System32\WindowsPowerShell\v1.0\;C:\Users\Administrator\AppData\Local\Microsoft\WindowsApps;C:\Windows\System32\OpenSSH-Win64;')
     # C:\Windows\System32\OpenSSH-Win64\install-sshd.ps1
-    # Start-Service sshd
-    # Set-Service sshd -StartupType Automatic
-    # New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH" -Enabled 1 -Direction Inbound -Action Allow -LocalPort 22 -Protocol TCP -erroraction SilentlyContinue
+    Start-Service sshd
+    Set-Service sshd -StartupType Automatic
+    New-NetFirewallRule -Name "OpenSSH" -DisplayName "OpenSSH" -Enabled 1 -Direction Inbound -Action Allow -LocalPort 22 -Protocol TCP -erroraction SilentlyContinue
 
     # drop a text file in the ssh install dir, need to double check location
-    New-Item C:\Windows\System32\OpenSSH-Win64\flag.txt
-    Set-Content C:\Windows\System32\OpenSSH-Win64\flag.txt $SSHFlag
+    New-Item 'C:\Windows\System32\OpenSSH\flag.txt'
+    Set-Content 'C:\Windows\System32\OpenSSH\flag.txt' $SSHFlag
 }
 
 function NetcatListeners {
     # probably replace exe name with flag or something, not sure yet
     # can also put the flag in a text file next to the exe
-    # put nc in C:\Windows\Fonts\nc
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1337}
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1338}
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1339}
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1340}
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1341}
-    # Start-Job -ScriptBlock{C:\Windows\nc.exe -l -p 1342}
-    New-Item 'C:\Program Files\nc\flag.txt'
-    Set-Content 'C:\Program Files\nc\flag.txt' $NetcatFlag
+    # put nc in C:\Windows\nc
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1337}
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1338}
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1339}
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1340}
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1341}
+    Start-Job -ScriptBlock{C:\Windows\nc\nc.exe -l -p 1342}
+    New-Item 'C:\Windows\nc\flag.txt'
+    Set-Content 'C:\Windows\nc\flag.txt' $NetcatFlag
 }
 
 function CurrentVersionRun {
@@ -110,6 +111,8 @@ function CurrentVersionRun {
     # can put flag in strings of file? will need to make sure to cover strings in IR lecture in some capacity
     # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name NotMalware -Value %SystemRoot%\system32\not_malware.exe -PropertyType ExpandString -Force
     # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name SuperSafeTotallyLegitProgram -Value %SystemRoot%\system32\SuperSafeTotallyLegitProgram.exe -PropertyType ExpandString -Force
+    
+    # I could also just grab the binaries from last year, put them in a folder and put a flag in there
 }
 
 function SpawnCMDs {
@@ -130,49 +133,19 @@ function SpawnCMDs {
 function InstallService {
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service?view=powershell-7.2
 
-    New-Service -Name "LegitService" -BinaryPathName '"C:\WINDOWS\System32\svchost.exe -k netsvcs"' -DisplayName "Legit Service" -StartupType "Automatic" -Description $InstalledServiceFlag
+    New-Service -Name "LegitService" -BinaryPathName 'C:\WINDOWS\System32\svchost.exe -k netsvcs' -DisplayName "Legit Service" -StartupType "Automatic" -Description $InstalledServiceFlag
     Start-Service -Name "LegitService"
 
 }
 
 function TaskScheduler {
-    # 'ScheduledTask'
-    # {
-    #     $CommandLine = '`"$($Env:SystemRoot)\System32\WindowsPowerShell\v1.0\powershell.exe -NonInteractive`"'
-    #     $ElevatedTriggerRemoval = "schtasks /Delete /TN Updater"
-
-    #     switch ($ElevatedPersistenceOption.Trigger)
-    #     {
-    #         'AtLogon'
-    #         {
-    #             $ElevatedTrigger = "schtasks /Create /RU system /SC ONLOGON /TN Updater /TR "
-    #         }
-
-    #         'Daily'
-    #         {
-    #             $ElevatedTrigger = "schtasks /Create /RU system /SC DAILY /ST $($ElevatedPersistenceOption.Time.ToString('HH:mm:ss')) /TN Updater /TR "
-    #         }
-
-    #         'Hourly'
-    #         {
-    #             $ElevatedTrigger = "schtasks /Create /RU system /SC HOURLY /TN Updater /TR "
-    #         }
-
-    #         'OnIdle'
-    #         {
-    #             $ElevatedTrigger = "schtasks /Create /RU system /SC ONIDLE /I 1 /TN Updater /TR "
-    #         }
-
-    #         default
-    #         {
-    #             throw 'Invalid elevated persistence options provided!'
-    #         }
-    #     }
-
-    #     $ElevatedTrigger = '"' + $ElevatedTrigger + $CommandLine + '"'
-    # }
-
-    schtasks /Create /RU system /SC MINUTE /MO 5 /TN "LegitTask" /TR C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonInteractive
+    $action = New-ScheduledTaskAction -Execute "C:\Windows\System32\WindowsPowerShell\v1.0\powershell.exe -NonInteractive"
+    $description = $TaskSchedulerFlag
+    $trigger = New-ScheduledTaskTrigger -AtLogOn
+    $principal = New-ScheduledTaskPrincipal -UserId "SYSTEM" -LogonType ServiceAccount -RunLevel Highest
+    $settings = New-ScheduledTaskSettingsSet
+    $task = New-ScheduledTask -Action $action -Description $description -Principal $principal -Trigger $trigger -Settings $settings
+    Register-ScheduledTask LegitTask -InputObject $task
 }
 
 function RDPMisconfig {
@@ -185,6 +158,8 @@ function RDPMisconfig {
     # should be able to actually overwrite policy with this, hopefully put flag in somewhere
     # i wonder if i can use a db tool to edit
     # https://www.riptidehosting.com/blog/rd-session-host-security-settings-in-windows-server-2016/
+
+    #seems like a lot of work, probably want to scrap
 }
 
 function KillFTPIIS {
@@ -274,10 +249,16 @@ function Main {
 
     Set-ExecutionPolicy Bypass
 
-    DisableDefender
-    MakeAdmins
-    ImageFileExecutionOptions
-    DisableFirewall
+    DisableDefender #working
+    MakeAdmins #working
+    ImageFileExecutionOptions #working
+    DisableFirewall #working
+    InstallSSH #working
+    NetcatListeners #working
+    InstallService #kinda working, won't start but that might be ok
+    TaskScheduler #working
+    #KillFTPIIS #need to install these first in order to test
+    #MapIISToC #need to install first
 
 # bigheck 2>&1 | tee -FilePath c:\windows\fonts\results.txt
 
