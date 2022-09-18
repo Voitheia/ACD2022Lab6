@@ -9,12 +9,10 @@ $FirewallFlag = "ACDLAB6{They_took_down_our_shields!}"
 $SSHFlag = "ACDLAB6{I_think_this_is_the_wrong_OS}"
 $CurrentVersionRunFlag = "ACDLAB6{Who_said_you_could_run_on_boot?}"
 $NetcatFlag = "ACDLAB6{Nyancat_bootloader_time!}"
-$SpawnedCMDFlag = "ACDLAB6{Hey_you_shouldn't_be_running_there}"
 $InstalledServiceFlag = "ACDLAB6{Definitely_a_legit_service}"
 $TaskSchedulerFlag = "ACDLAB6{Wanna_see_me_run_it_again?}"
 $KillFTPIISFlag = "ACDLAB6{Red_team_turned_off_my_services!}"
 #$DisableDefenderFlag = "ACDLAB6{Hey_shouldn't_this_thing_be_on?}"
-$RDPMisconfigFlag = "ACDLAB6{RDP_is_a_super_secure_protocol}"
 #$ImageFileExecutionOptionsFlag = "ACDLAB6{No_chrome_for_you_:)}"
 $MapIISToCFlag = "ACDLAB6{Maybe_don't_have_C_publicly_avaialble}"
 
@@ -109,32 +107,18 @@ function CurrentVersionRun {
     # Need new names for exes, probably put flags in values next to these
     # maybe create dummy exes that just pop msg box
     # can put flag in strings of file? will need to make sure to cover strings in IR lecture in some capacity
-    # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name NotMalware -Value %SystemRoot%\system32\not_malware.exe -PropertyType ExpandString -Force
-    # New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name SuperSafeTotallyLegitProgram -Value %SystemRoot%\system32\SuperSafeTotallyLegitProgram.exe -PropertyType ExpandString -Force
-    
+    # need to make C:\Windows\System32\CoolPrograms folder
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name NotMalware -Value %SystemRoot%\system32\CoolPrograms\not_malware.exe -PropertyType ExpandString -Force
+    New-ItemProperty -Path "HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Run" -Name SuperSafeTotallyLegitProgram -Value %SystemRoot%\system32\CoolPrograms\SuperSafeTotallyLegitProgram.exe -PropertyType ExpandString -Force
+    New-Item 'C:\Windows\System32\CoolPrograms\flag.txt'
+    Set-Content 'C:\Windows\System32\CoolPrograms\flag.txt' $CurrentVersionRunFlag
     # I could also just grab the binaries from last year, put them in a folder and put a flag in there
-}
-
-function SpawnCMDs {
-# https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/start-process?view=powershell-7.2
-# would be pretty easy to just spawn a command prompt
-# probably have it repeatedly echo the flag every so often so it shows up
-# could have the cmdline options include the flag
-# https://github.com/smb01/PowershellTools/blob/master/inject.ps1
-# defender is flagging this, might need invoke-obfuscation
-# in ./inject.ps1
-
-# need to generate msfvenom shellcode to spawn cmd and run a command and stay open
-# probably inject two or three, targets might be explorer or a few svchosts
-# itll probably be easiest to just use the script as is
-# will need to supply the PIDs at run time
 }
 
 function InstallService {
 # https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.management/new-service?view=powershell-7.2
 
     New-Service -Name "LegitService" -BinaryPathName 'C:\WINDOWS\System32\svchost.exe -k netsvcs' -DisplayName "Legit Service" -StartupType "Automatic" -Description $InstalledServiceFlag
-    Start-Service -Name "LegitService"
 
 }
 
@@ -148,20 +132,6 @@ function TaskScheduler {
     Register-ScheduledTask LegitTask -InputObject $task
 }
 
-function RDPMisconfig {
-    # https://serverfault.com/questions/911131/how-can-i-locate-registry-key-for-group-policy-settings
-    # https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/secedit
-    # can use this to edit policy?
-    # https://docs.microsoft.com/en-us/windows-server/administration/windows-commands/secedit-configure
-    # https://www.techrepublic.com/article/solutionbase-using-the-secedit-tool-to-work-with-security-templates/
-    # this seems to let me replace the secedit.db with like a template or one that I already have
-    # should be able to actually overwrite policy with this, hopefully put flag in somewhere
-    # i wonder if i can use a db tool to edit
-    # https://www.riptidehosting.com/blog/rd-session-host-security-settings-in-windows-server-2016/
-
-    #seems like a lot of work, probably want to scrap
-}
-
 function KillFTPIIS {
     Stop-Service W3SVC
     Stop-Service ftpsvc
@@ -172,13 +142,12 @@ function KillFTPIIS {
 }
 
 function MapIISToC {
+    mkdir "C:\ACDLAB6{Maybe_don't_have_C_publicly_avaialble}"
     cmd.exe /C "%windir%\system32\inetsrv\appcmd.exe unlock config -section:system.webServer/handlers"
     $sitenames = Get-IISSite | Where-Object Bindings -Match ".*ftp.*" | Select-Object -ExpandProperty Name
     foreach ($site in $sitenames) {
         Set-WebConfigurationProperty -pspath 'MACHINE/WEBROOT/APPHOST' -filter "system.applicationHost/sites/site[@name='$site']/ftpServer/security/authentication/anonymousAuthentication" -name "enabled" -value "True"
-        Set-ItemProperty "IIS:\Sites\$site" -Name physicalPath -Value 'C:'
-        # see if I can bind this to a path that doesn't exist
-        # ACDLAB6{Maybe_don't_have_C_publicly_avaialble}
+        Set-ItemProperty "IIS:\Sites\$site" -Name physicalPath -Value "C:\ACDLAB6{Maybe_don't_have_C_publicly_avaialble}"
     }
 }
 
@@ -249,23 +218,26 @@ function Main {
 
     Set-ExecutionPolicy Bypass
 
-    DisableDefender #working
-    MakeAdmins #working
-    ImageFileExecutionOptions #working
-    DisableFirewall #working
-    InstallSSH #working
-    NetcatListeners #working
-    InstallService #kinda working, won't start but that might be ok
-    TaskScheduler #working
-    #KillFTPIIS #need to install these first in order to test
-    #MapIISToC #need to install first
-
-# bigheck 2>&1 | tee -FilePath c:\windows\fonts\results.txt
-
-# Write-ZipUsing7Zip -FilesToZip "c:\windows\fonts\results.txt" -ZipOutputFilePath "c:\windows\fonts\results.zip" -Password "NotSqordfish:)"
-
-# Remove-Item -Path "c:\windows\fonts\results.txt" -Force
+    DisableDefender
+    MakeAdmins
+    ImageFileExecutionOptions
+    DisableFirewall
+    InstallSSH
+    NetcatListeners
+    InstallService
+    TaskScheduler
+    CurrentVersionRun
+    KillFTPIIS
+    MapIISToC
 
 }
 
-Main
+BeginMsgBox
+
+Main 2>&1 | Tee-Object -FilePath C:\Windows\Fonts\results.txt
+
+Write-ZipUsing7Zip -FilesToZip "C:\Windows\Fonts\results.txt" -ZipOutputFilePath "C:\Windows\Fonts\results.zip" -Password "NotSqordfish:)"
+
+Remove-Item -Path "C:\Windows\Fonts\results.txt" -Force
+
+EndMsgBox
